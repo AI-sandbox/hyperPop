@@ -89,6 +89,9 @@ def main():
     np.save(config["output_dir"] + "valid_indices.npy", valid_indices)
     np.save(config["output_dir"] + "test_indices.npy", test_indices)
     
+    if config["variance_filter"] is not None:
+        variance_filter(dataset, train_indices, config["variance_filter"])
+        
     train_sampler, valid_sampler = SubsetRandomSampler(train_indices), SubsetRandomSampler(valid_indices)
     train_loader = DataLoader(dataset, batch_size=config["batch_size"], sampler=train_sampler)
     valid_loader = DataLoader(dataset, batch_size=config["batch_size"], sampler=valid_sampler)

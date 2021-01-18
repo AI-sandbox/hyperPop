@@ -56,6 +56,14 @@ def train_valid_test(data_len, train_perc, valid_perc):
     valid_indices = indices[train_size : train_size + valid_size]
     test_indices = indices[train_size + valid_size : ]
     return train_indices, valid_indices, test_indices
+
+def variance_filter(dataset, train_indices, snps_to_keep):
+    train_vars = np.var(dataset.snps[train_indices, :], axis=0)
+    print("Variances Calculated")
+    snps_preserved = np.argsort(train_vars)[::-1][0:snps_to_keep]
+    print("Subset calculated")
+    dataset.snps = dataset.snps[:,snps_preserved]
+    return
                           
                             
                         
