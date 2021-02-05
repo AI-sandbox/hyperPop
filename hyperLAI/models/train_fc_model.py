@@ -1,6 +1,6 @@
 import sys
 sys.path.append("../")
-sys.path.append("../../../")
+sys.path.append("../../../libraries/")
 import numpy as np
 import torch
 import os

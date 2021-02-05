@@ -16,7 +16,7 @@ dataset = HyperLoader(data_dir, [0,1,2,3,4,5,6], "all")
 
 train_indices, valid_indices, test_indices = train_valid_test(len(dataset), 0.8, 0.1)
 
-print(test_indices[0])
+print(test_indices[0]) #Verify that the same indices are always being used
 
 np.random.seed(0)
 train_shortened = np.random.choice(train_indices, size=2000)

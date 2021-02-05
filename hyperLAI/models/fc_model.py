@@ -2,7 +2,7 @@ import sys
 sys.path.append("../")
 import torch
 from torch import nn
-from models.hyperbolic_loss import HyperbolicLoss
+from models.hyperbolic_hc_loss import HyperbolicHCLoss
 
 class fc_model(nn.Module):
     def __init__(self, input_size, num_int_layers, int_layer_sizes, embedding_size, dropout_vals,
@@ -25,7 +25,7 @@ class fc_model(nn.Module):
             )
                 
         self.final_layer = nn.Linear(in_features=int_layer_sizes[-1], out_features=embedding_size)
-        self.HypLoss = HyperbolicLoss(temperature, init_size, min_scale, max_scale)
+        self.HypLoss = HyperbolicHCLoss(temperature, init_size, min_scale, max_scale)
         
     def forward(self, snp_data):
         for fc_unit in self.fc_layers:
