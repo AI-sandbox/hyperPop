@@ -1,6 +1,6 @@
 import sys
 sys.path.append("../../")
-sys.path.append("../../../../")
+sys.path.append("../../../../libraries/")
 import numpy as np
 import torch
 import os
@@ -11,6 +11,7 @@ from utils.model_utils import *
 from features.hyperLAIdataset import HyperLoader
 
 data_dir = "/scratch/users/patelas/hyperLAI/snp_data/whole_genome/"
+# data_dir = "/scratch/users/patelas/hyperLAI/snp_data/whole_genome/variance_filtered_500000/"
 
 dataset = HyperLoader(data_dir, [0,1,2,3,4,5,6], "all")
 
