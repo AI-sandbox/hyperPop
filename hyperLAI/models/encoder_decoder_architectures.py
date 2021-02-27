@@ -25,10 +25,10 @@ class fc_wrapped_encoder(nn.Module):
                 )
             )
                 
-        # last_input_dim = encoder_int_layer_sizes[-1] if num_encoder_int_layers > 0 
+        last_layer_input = encoder_int_layer_sizes[-1] if num_encoder_int_layers > 0 else self.input_size
         
-        self.final_layer_mean = nn.Linear(in_features=encoder_int_layer_sizes[-1], out_features=self.embedding_size)    
-        self.final_layer_std = nn.Linear(in_features=encoder_int_layer_sizes[-1], out_features=self.embedding_size)
+        self.final_layer_mean = nn.Linear(in_features=last_layer_input, out_features=self.embedding_size)    
+        self.final_layer_std = nn.Linear(in_features=last_layer_input, out_features=self.embedding_size)
 
     def forward(self, snp_data):
         for fc_unit in self.fc_layers:
@@ -59,8 +59,10 @@ class fc_wrapped_decoder(nn.Module):
                     nn.Dropout(decoder_dropout_vals[layer])
                 )
             )
-                
-        self.final_layer = nn.Linear(in_features=decoder_int_layer_sizes[-1], out_features=self.input_size)       
+                               
+        last_layer_input = decoder_int_layer_sizes[-1] if num_decoder_int_layers > 0 else self.embedding_size
+        
+        self.final_layer = nn.Linear(in_features=last_layer_input, out_features=self.input_size)       
 
     def forward(self, embeddings):
         embeddings = self.manifold.logmap0(embeddings)
@@ -92,7 +94,9 @@ class fc_geodesic_decoder(nn.Module):
                     nn.Dropout(decoder_dropout_vals[layer])
                 )
             )
-                
+            
+        last_layer_input = decoder_int_layer_sizes[-1] if num_decoder_int_layers > 0 else self.embedding_size
+        
         self.final_layer = nn.Linear(in_features=decoder_int_layer_sizes[-1], out_features=self.input_size)       
 
     def forward(self, embeddings):
