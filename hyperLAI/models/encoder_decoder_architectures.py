@@ -100,7 +100,8 @@ class fc_geodesic_decoder(nn.Module):
         self.final_layer = nn.Linear(in_features=decoder_int_layer_sizes[-1], out_features=self.input_size)       
 
     def forward(self, embeddings):
-        embeddings = self.geodesiclayer(embeddings.unsqueeze(-2)).squeeze()
+        # embeddings = self.geodesiclayer(embeddings.unsqueeze(-2)).squeeze()
+        embeddings = self.geodesiclayer(embeddings.unsqueeze(dim=0)).squeeze()
         for fc_unit in self.fc_layers:
             embeddings = fc_unit(embeddings)
         recon_data = nn.Sigmoid()(self.final_layer(embeddings))

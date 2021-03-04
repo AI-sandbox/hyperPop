@@ -62,10 +62,7 @@ def run_epoch(model, dloader, device, sim_func, kl_weight, hc_weight, recon_weig
             optimizer.zero_grad()
         else:
             assert optimizer is None
-        triple_ids, similarities = trips_and_sims(snp_data, sim_func)
         snp_data = snp_data.float().to(device)
-        triple_ids = triple_ids.to(device)
-        similarities = similarities.float().to(device)
         loc, scale, embeddings_pred, qzx_fitted, reconstructions = model(snp_data)
         total, kl, hyphc, recon = compute_total_loss(model, device, embeddings_pred, reconstructions, 
                                                      snp_data, kl_weight, hc_weight, recon_weight, sim_func, qzx_fitted)
