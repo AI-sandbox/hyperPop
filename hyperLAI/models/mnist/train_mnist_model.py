@@ -37,6 +37,22 @@ distribution_dict = {"WrappedNormal": WrappedNormal, "Normal": Normal, "Riemanni
 
 def compute_total_loss(model, device, embeddings, 
                        reconstructions, snp_data, labels, kl_weight, hc_weight, recon_weight, sim_func, qzx_fitted):
+    '''
+    Loss function used for the variational autoencoder. Comprises KL divergence, reconstruction, and Hyperbolic HC losses. 
+    Arguments:
+        `model: VAE model being trained
+        `device: device used for trainings
+        `embeddings: embeddings produced by model
+        `reconstructions: reconstructions produced by model
+        `snp_data: input data
+        `labels: data labels
+        `kl_weight (int/float): weight for KL divergence loss
+        `hc_weight (int/float): weight for HC loss
+        `recon_weight (int/float): weight for reconstruction loss
+        `sim_func: function used to calculate pairwise similarity
+        `qzx_fitted: fitted posterior distribution (pytorch-like)
+
+    '''
     #Calculate hierarchical clustering loss
     triple_ids, similarities = trips_and_sims(labels, sim_func)
     triple_ids = triple_ids.to(device)
@@ -57,6 +73,12 @@ def compute_total_loss(model, device, embeddings,
     return total_loss, kl_weight * kl_div, hc_weight * hyphc_loss, recon_weight * mse_loss
 
 def run_epoch(model, dloader, device, sim_func, kl_weight, hc_weight, recon_weight, optimizer=None):
+    '''
+    Trains or validates model for one epoch. Called in the train_model function
+    `dloader: dataloader, for either training or validation
+    `device: device training is occurring on
+    All other parameters are same as in train_model
+    '''
     total_losses, kl_losses, hyphc_losses, reconstruction_losses = [], [], [], []
     for i, (image, label) in enumerate(dloader):
         if model.training:
@@ -80,6 +102,26 @@ def run_epoch(model, dloader, device, sim_func, kl_weight, hc_weight, recon_weig
 
 def train_model(model, train_loader, valid_loader, num_epochs, learning_rate, sim_func, kl_weight, hc_weight, recon_weight,
                 txt_writer, output_dir, early_stopping, patience, early_stop_min_delta, optimizer=None):
+
+    '''
+    Code to train VAE model
+    Arguments:
+        `model: VAE model to be trained
+        `train_loader: train dataloader
+        `valid_loader: validation dataloader
+        `num_epochs: max num epochs to train
+        `learning_rate: learning rate for training
+        `sim_func: similarity function used to calculate pairwise similarities for HC loss
+        `kl_weight (int/float): weight for KL divergence loss
+        `hc_weight (int/float): weight for HC loss
+        `recon_weight (int/float): weight for reconstruction loss
+        `txt_writer: opened csv file to write training logs
+        `output_dir: directory to store model and logginig information
+        `early_stopping (bool): whether to use early stopping
+        `patience (int): num of epochs to store for early stopping
+        `early_stop_min_delta (float): min delta for early stopping
+    '''
+
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     if device == torch.device("cuda"):
         print("Training occurring on GPU")
@@ -128,6 +170,8 @@ def main():
         os.mkdir(args["output_dir"])
     os.system("cp mnist_vae_config.json %smnist_vae_config.json" %(args["output_dir"]))
     print("JSON Copied")
+    
+    #Load data, making datasets the specified size
     flat_trans = transforms.Lambda(lambda x: x.flatten())
     mnist_train = torchvision.datasets.MNIST(root=args["mnist_root"], train=True, download=False, 
                                              transform=transforms.Compose([transforms.ToTensor(), flat_trans]))
@@ -139,10 +183,12 @@ def main():
     train_final, valid_final = torch.utils.data.random_split(tv_final, [args["train_size"], args["valid_size"]], 
                                                              generator=torch.Generator().manual_seed(0))
     print(len(train_final), len(valid_final))
-    print(train_final[0][1], valid_final[0][1])
+    print(train_final[0][1], valid_final[0][1]) #Ensure random seeds are still constant, etc.
+    #Define dataloaders
     train_loader = DataLoader(train_final, batch_size=args["batch_size"])
     valid_loader = DataLoader(valid_final, batch_size=args["batch_size"])
     
+    #Define manifolds and models
     manifold = manifold_dict[args["manifold"]](args["embedding_size"])
     enc_type, dec_type  = enc_dec_dict[args["enc_type"]], enc_dec_dict[args["dec_type"]]
     encoder = enc_type(manifold, train_final[0][0].shape[-1], args["num_encoder_int_layers"], 
@@ -154,8 +200,9 @@ def main():
                       distribution_dict[args["prior_dist"]], args["prior_mean"], args["prior_std"], args["temperature"], 
                       args["init_size"], args["min_scale"], args["max_scale"])
     print(model)
+    #Define text writer
     txt_writer = open(args["output_dir"] + "csv_log.csv", "w")
-    
+    #Train model
     train_model(model, train_loader, valid_loader, args["num_epochs"], args["learning_rate"], 
                 sim_func_dict[args["sim_func"]], args["kl_weight"], args["hc_weight"], 
                 args["recon_weight"], txt_writer, args["output_dir"], args["early_stopping"], 

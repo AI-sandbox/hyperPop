@@ -3,9 +3,23 @@ from torch import nn
 from models.hyperbolic_hc_loss import HyperbolicHCLoss
 from pvae.ops.manifold_layers import GeodesicLayer
 
+#Encoder and decoder architectures for the vae model
+#These are inspired by models found in the pvae repo: (https://github.com/emilemathieu/pvae/tree/master/pvae)
+
+
 class fc_wrapped_encoder(nn.Module):
     def __init__(self, manifold, input_size, num_encoder_int_layers, encoder_int_layer_sizes, encoder_dropout_vals,
                                   embedding_size):
+        '''
+        Fully connected wrapped encoder
+        Arguments:
+            `manifold: manifold to use for the model
+            `input_size (int): input dimension of the data
+            `num_encoder_int_layers (int): number of hidden layers in the encoder
+            `encoder_int_layer_sizes (list): size of each hidden layer
+            `encoder_dropout_vals (list): dropout percentages for each hidden layer
+            `embedding_size (int): size of the final embedding
+        '''
         
         super().__init__()  
         self.manifold = manifold
@@ -42,6 +56,17 @@ class fc_wrapped_decoder(nn.Module):
     def __init__(self, manifold, input_size, num_decoder_int_layers, decoder_int_layer_sizes, decoder_dropout_vals,
                                   embedding_size):
         
+        '''
+        Fully connected wrapped decoder
+        Arguments:
+            `manifold: manifold to use for the model
+            `input_size (int): input dimension of the data (so the output dimension of the decoder)
+            `num_decoder_int_layers (int): number of hidden layers in the decoder
+            `decoder_int_layer_sizes (list): size of each hidden layer
+            `decoder_dropout_vals (list): dropout percentages for each hidden layer
+            `embedding_size (int): size of the embedding (ie. the input to the decoder)
+        '''
+
         super().__init__()
         self.manifold = manifold
         self.input_size = input_size
@@ -75,6 +100,17 @@ class fc_geodesic_decoder(nn.Module):
     def __init__(self, manifold, input_size, num_decoder_int_layers, decoder_int_layer_sizes, decoder_dropout_vals,
                                   embedding_size):
         
+        '''
+        Fully connected geodesic decoder (uses a geodesic layer as the first layer of the decoder)
+        Arguments:
+            `manifold: manifold to use for the model
+            `input_size (int): input dimension of the data (so the output dimension of the decoder)
+            `num_decoder_int_layers (int): number of hidden layers in the decoder
+            `decoder_int_layer_sizes (list): size of each hidden layer
+            `decoder_dropout_vals (list): dropout percentages for each hidden layer
+            `embedding_size (int): size of the embedding (ie. the input to the decoder)
+        '''
+
         super().__init__()
         self.manifold = manifold
         self.input_size = input_size

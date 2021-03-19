@@ -7,6 +7,18 @@ from models.hyperbolic_hc_loss import HyperbolicHCLoss
 class fc_model(nn.Module):
     def __init__(self, input_size, num_int_layers, int_layer_sizes, embedding_size, dropout_vals,
                 temperature=0.05, init_size=1e-3, min_scale=1e-2, max_scale=1. - 1e-3):
+        '''
+        Fully connected model to produce embeddings using Hyperbolic HC loss
+        Arguments:
+            `input_size (int): input dimension of the data
+            `num_int_layers (int): number of hidden layers 
+            `int_layer_sizes (list): size of each hidden layer
+            `dropout_vals (list): dropout percentages for each hidden layer
+            `embedding_size (int): size of the final embedding
+            `temperature (float): scale factor used in Hyperbolic HC Loss calculations (see HypHC paper)
+            `init_size, min_scale, max_scale: further parameters for Hyperbolic HC
+
+        '''
         super().__init__()
         assert len(int_layer_sizes) == num_int_layers and len(dropout_vals) == num_int_layers
         self.input_size = input_size

@@ -30,6 +30,7 @@ class HyperLoader(data.Dataset):
             test_data = tuple([np.load(self.data_dir + x) for x in file_order])
             ind_data = test_data[0]
         else:
+            #The data for individual chromosomes is in a slightly different format
             test_data = load_dataset(self.data_dir + "ref_final_beagle_phased_1kg_hgdp_sgdp_chr%s_hg19.vcf.gz"%(self.chromosome), 
                                      self.data_dir + "reference_panel_metadata.tsv", "./", chromosome=self.chromosome, 
                                      verbose=True, filter_admixed=True, filter_missing_coord=True)

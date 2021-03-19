@@ -35,6 +35,20 @@ distribution_dict = {"WrappedNormal": WrappedNormal, "Normal": Normal, "Riemanni
 
 def compute_total_loss(model, device, embeddings, 
                        reconstructions, snp_data, kl_weight, hc_weight, recon_weight, sim_func, qzx_fitted):
+    '''
+    Loss function used for the variational autoencoder. Comprises KL divergence, reconstruction, and Hyperbolic HC losses. 
+    Arguments:
+        `model: VAE model being trained
+        `device: device used for trainings
+        `embeddings: embeddings produced by model
+        `reconstructions: reconstructions produced by model
+        `snp_data: input data
+        `kl_weight (int/float): weight for KL divergence loss
+        `hc_weight (int/float): weight for HC loss
+        `recon_weight (int/float): weight for reconstruction loss
+        `sim_func: function used to calculate pairwise similarity
+        `qzx_fitted: fitted posterior distribution (pytorch-like)
+    '''
     #Calculate hierarchical clustering loss
     triple_ids, similarities = trips_and_sims(snp_data, sim_func)
     triple_ids = triple_ids.to(device)
@@ -55,6 +69,12 @@ def compute_total_loss(model, device, embeddings,
     return total_loss, kl_weight * kl_div, hc_weight * hyphc_loss, recon_weight * binary_loss
 
 def run_epoch(model, dloader, device, sim_func, kl_weight, hc_weight, recon_weight, optimizer=None):
+    '''
+    Trains or validates model for one epoch. Called in the train_model function
+    `dloader: dataloader, for either training or validation
+    `device: device training is occurring on
+    All other parameters are same as in train_model
+    '''
     total_losses, kl_losses, hyphc_losses, reconstruction_losses = [], [], [], []
     for i, (snp_data, suppop_labels, pop_labels) in enumerate(dloader):
         if model.training:
@@ -63,13 +83,16 @@ def run_epoch(model, dloader, device, sim_func, kl_weight, hc_weight, recon_weig
         else:
             assert optimizer is None
         snp_data = snp_data.float().to(device)
+        #Make predictions
         loc, scale, embeddings_pred, qzx_fitted, reconstructions = model(snp_data)
+        #Calculate various terms in the loss
         total, kl, hyphc, recon = compute_total_loss(model, device, embeddings_pred, reconstructions, 
                                                      snp_data, kl_weight, hc_weight, recon_weight, sim_func, qzx_fitted)
         total_losses.append(total.item())
         kl_losses.append(kl.item())
         hyphc_losses.append(hyphc.item())
         reconstruction_losses.append(recon.item())
+        #If we are training, then update the weights
         if model.training:
             total.backward()
             optimizer.step()
@@ -77,6 +100,24 @@ def run_epoch(model, dloader, device, sim_func, kl_weight, hc_weight, recon_weig
 
 def train_model(model, train_loader, valid_loader, num_epochs, learning_rate, sim_func, kl_weight, hc_weight, recon_weight,
                 txt_writer, output_dir, early_stopping, patience, early_stop_min_delta, optimizer=None):
+    '''
+    Code to train VAE model
+    Arguments:
+        `model: VAE model to be trained
+        `train_loader: train dataloader
+        `valid_loader: validation dataloader
+        `num_epochs: max num epochs to train
+        `learning_rate: learning rate for training
+        `sim_func: similarity function used to calculate pairwise similarities for HC loss
+        `kl_weight (int/float): weight for KL divergence loss
+        `hc_weight (int/float): weight for HC loss
+        `recon_weight (int/float): weight for reconstruction loss
+        `txt_writer: opened csv file to write training logs
+        `output_dir: directory to store model and logginig information
+        `early_stopping (bool): whether to use early stopping
+        `patience (int): num of epochs to store for early stopping
+        `early_stop_min_delta (float): min delta for early stopping
+    '''
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     if device == torch.device("cuda"):
         print("Training occurring on GPU")
@@ -126,18 +167,22 @@ def main():
     os.system("cp vae_config.json %svae_config.json" %(args["output_dir"]))
     print("JSON Copied")
     
+    #Define dataset
     if args["dataset"] == "ancestry":
         dataset = HyperLoader(args["data_dir"], args["restrict_labels"], args["chromosome"])
     
+    #Set train, valid, test indices
     train_indices, valid_indices, test_indices = train_valid_test(len(dataset), args["train_perc"], args["valid_perc"])
     np.save(args["output_dir"] + "train_indices.npy", train_indices)
     np.save(args["output_dir"] + "valid_indices.npy", valid_indices)
     np.save(args["output_dir"] + "test_indices.npy", test_indices)
-            
+    
+    #Create train and valid dataloaders
     train_sampler, valid_sampler = SubsetRandomSampler(train_indices), SubsetRandomSampler(valid_indices)
     train_loader = DataLoader(dataset, batch_size=args["batch_size"], sampler=train_sampler)
     valid_loader = DataLoader(dataset, batch_size=args["batch_size"], sampler=valid_sampler)
     
+    #Define manifolds and models
     manifold = manifold_dict[args["manifold"]](args["embedding_size"])
     enc_type, dec_type  = enc_dec_dict[args["enc_type"]], enc_dec_dict[args["dec_type"]]
     encoder = enc_type(manifold, dataset[0][0].shape[-1], args["num_encoder_int_layers"], 
@@ -148,7 +193,9 @@ def main():
     model = vae_model(encoder, decoder, manifold, distribution_dict[args["posterior_dist"]],
                       distribution_dict[args["prior_dist"]], args["prior_mean"], args["prior_std"], args["temperature"], args["init_size"], args["min_scale"], args["max_scale"])
     print(model)
+    #Define logger
     txt_writer = open(args["output_dir"] + "csv_log.csv", "w")
+    #Train
     train_model(model, train_loader, valid_loader, args["num_epochs"], args["learning_rate"], 
                 sim_func_dict[args["sim_func"]], args["kl_weight"], args["hc_weight"], 
                 args["recon_weight"], txt_writer, args["output_dir"], args["early_stopping"], 
