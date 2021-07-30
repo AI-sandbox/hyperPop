@@ -6,18 +6,20 @@ from utils.generate_dataset import *
 from HypHC.datasets.triples import samples_triples
 
 class HyperLoader(data.Dataset):
-    def __init__(self, data_dir, restrict_labels=[0,1,2,3,4,5,6], chromosome="all"):
+    def __init__(self, data_dir, split_indices, restrict_labels=[0,1,2,3,4,5,6], chromosome="all"):
         '''
         Takes in all the relevant arguments to produce the dataset.
         Arguments:
             `data_dir`: directory in which data (either text files or numpy arrays) are located
             `similarity_func`: function to calculate pairwise similarities
+            `split_indices`: indices for the data split (train/test/valid)
             `restrict_labels`: list of super-populations to include in analysis. Indices correspond to 'EUR', 'EAS', 'AMR', 'SAS', 'AFR', 'OCE', 'WAS'
         '''
 
         self.data_dir = data_dir 
         self.restrict_labels = restrict_labels
         self.chromosome = chromosome
+        self.split_indices = split_indices
         self.snps, self.pop_labels, self.suppop_labels, self.pop_label_index, self.suppop_label_index = self.load_data()
     def load_data(self):
         '''
@@ -40,7 +42,8 @@ class HyperLoader(data.Dataset):
         ind_pop_labels = np.repeat(test_data[2], 2).astype(int)
         ind_suppop_labels = np.repeat(test_data[1], 2).astype(int)
         #Restrict to only the super-populations we've specified
-        indices = np.argwhere(np.isin(ind_suppop_labels, self.restrict_labels)).T[0]
+        pop_indices = np.argwhere(np.isin(ind_suppop_labels, self.restrict_labels)).T[0]
+        indices = np.intersect1d(pop_indices, self.split_indices)
         #Return everything
         return ind_data[indices], ind_pop_labels[indices], ind_suppop_labels[indices], test_data[4], test_data[6]
     def __len__(self):
