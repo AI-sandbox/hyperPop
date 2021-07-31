@@ -167,27 +167,27 @@ def main():
     os.system("cp vae_config.json %svae_config.json" %(args["output_dir"]))
     print("JSON Copied")
     
+    #Load train and validation indices
+    train_indices = np.load(args["index_loc"] + "train_indices.npy")
+    valid_indices = np.load(args["index_loc"] + "valid_indices.npy")
+    
     #Define dataset
     if args["dataset"] == "ancestry":
-        dataset = HyperLoader(args["data_dir"], args["restrict_labels"], args["chromosome"])
-    
-    #Set train, valid, test indices
-    train_indices, valid_indices, test_indices = train_valid_test(len(dataset), args["train_perc"], args["valid_perc"])
-    np.save(args["output_dir"] + "train_indices.npy", train_indices)
-    np.save(args["output_dir"] + "valid_indices.npy", valid_indices)
-    np.save(args["output_dir"] + "test_indices.npy", test_indices)
-    
+        dataset_train = HyperLoader(args["data_dir"], train_indices, args["restrict_labels"], args["chromosome"])
+        print(len(dataset_train), dataset_train.pop_labels[2])
+        dataset_valid = HyperLoader(args["data_dir"], valid_indices, args["restrict_labels"], args["chromosome"])
+        print(len(dataset_valid), dataset_valid.pop_labels[2])
+        
     #Create train and valid dataloaders
-    train_sampler, valid_sampler = SubsetRandomSampler(train_indices), SubsetRandomSampler(valid_indices)
-    train_loader = DataLoader(dataset, batch_size=args["batch_size"], sampler=train_sampler)
-    valid_loader = DataLoader(dataset, batch_size=args["batch_size"], sampler=valid_sampler)
+    train_loader = DataLoader(dataset_train, batch_size=args["batch_size"])
+    valid_loader = DataLoader(dataset_valid, batch_size=args["batch_size"])
     
     #Define manifolds and models
     manifold = manifold_dict[args["manifold"]](args["embedding_size"])
     enc_type, dec_type  = enc_dec_dict[args["enc_type"]], enc_dec_dict[args["dec_type"]]
-    encoder = enc_type(manifold, dataset[0][0].shape[-1], args["num_encoder_int_layers"], 
+    encoder = enc_type(manifold, dataset_train[0][0].shape[-1], args["num_encoder_int_layers"], 
                        args["encoder_int_layer_sizes"], args["encoder_dropout_vals"], args["embedding_size"])
-    decoder = dec_type(manifold, dataset[0][0].shape[-1], args["num_decoder_int_layers"], 
+    decoder = dec_type(manifold, dataset_train[0][0].shape[-1], args["num_decoder_int_layers"], 
                        args["decoder_int_layer_sizes"], args["decoder_dropout_vals"], args["embedding_size"])
     
     model = vae_model(encoder, decoder, manifold, distribution_dict[args["posterior_dist"]],
