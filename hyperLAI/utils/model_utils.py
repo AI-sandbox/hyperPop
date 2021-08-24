@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import pandas as pd
 import itertools
 import json
 
@@ -101,6 +102,19 @@ def variance_filter(dataset, train_indices, snps_to_keep):
     print("Subset calculated")
     dataset.snps = dataset.snps[:,snps_preserved]
     return
-                          
-                            
+   
+def fst_filter(snp_data, indices, labels, snps_to_keep):
+    ind_snps = snp_data[indices]
+    ind_labels = labels[indices]
+    overall_vars = np.var(ind_snps, axis=0)
+    labels_group = pd.DataFrame(ind_snps).groupby(ind_labels)
+    pop_vars = labels_group.apply(np.var)
+    pop_freqs = labels_group.count()[0] / ind_snps.shape[0]
+    weighted_sum_vars = pop_freqs.values @ pop_vars.values
+    fst_vals = (overall_vars - weighted_sum_vars) / (overall_vars + 1e-8)
+    snps_preserved = np.argsort(fst_vals)[::-1][0:snps_to_keep]
+    print(fst_vals[snps_preserved[0]], fst_vals[snps_preserved[1]])
+    return snps_preserved
+      
+
                         

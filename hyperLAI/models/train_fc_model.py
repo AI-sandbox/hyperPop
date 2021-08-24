@@ -82,20 +82,21 @@ def main():
         os.mkdir(config["output_dir"])
     os.system("cp fc_config.json %sfc_config.json" %(config["output_dir"]))
     print("JSON Copied")
-    dataset = HyperLoader(config["data_dir"], config["restrict_labels"], config["chromosome"])
     
-    train_indices, valid_indices, test_indices = train_valid_test(len(dataset), config["train_perc"], config["valid_perc"])
-    np.save(config["output_dir"] + "train_indices.npy", train_indices)
-    np.save(config["output_dir"] + "valid_indices.npy", valid_indices)
-    np.save(config["output_dir"] + "test_indices.npy", test_indices)
+    #Load train and validation indices
+    train_indices = np.load(config["index_loc"] + "train_indices.npy")
+    valid_indices = np.load(config["index_loc"] + "valid_indices.npy")
     
-    if config["variance_filter"] is not None:
-        variance_filter(dataset, train_indices, config["variance_filter"])
+    dataset_train = HyperLoader(config["data_dir"], train_indices, config["restrict_labels"], config["chromosome"])
+    print(len(dataset_train), dataset_train.pop_labels[2])
+    dataset_valid = HyperLoader(config["data_dir"], valid_indices, config["restrict_labels"], config["chromosome"])
+    print(len(dataset_valid), dataset_valid.pop_labels[2])
         
-    train_sampler, valid_sampler = SubsetRandomSampler(train_indices), SubsetRandomSampler(valid_indices)
-    train_loader = DataLoader(dataset, batch_size=config["batch_size"], sampler=train_sampler)
-    valid_loader = DataLoader(dataset, batch_size=config["batch_size"], sampler=valid_sampler)
-    model = fc_model(dataset.snps.shape[1], config["num_int_layers"], config["int_layer_sizes"], config["embedding_size"], 
+    #Create train and valid dataloaders
+    train_loader = DataLoader(dataset_train, batch_size=config["batch_size"])
+    valid_loader = DataLoader(dataset_valid, batch_size=config["batch_size"])
+
+    model = fc_model(dataset_train.snps.shape[1], config["num_int_layers"], config["int_layer_sizes"], config["embedding_size"], 
                      config["dropout_vals"], config["temperature"], config["init_size"], config["min_scale"], config["max_scale"])
     txt_writer = open(config["output_dir"] + "csv_log.csv", "w")
     
