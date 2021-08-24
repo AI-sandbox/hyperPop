@@ -34,7 +34,8 @@ manifold_dict = {"PoincareBall": PoincareBall, "Euclidean": Euclidean}
 distribution_dict = {"WrappedNormal": WrappedNormal, "Normal": Normal, "RiemannianNormal": RiemannianNormal}
 
 def compute_total_loss(model, device, embeddings, 
-                       reconstructions, snp_data, kl_weight, hc_weight, recon_weight, sim_func, qzx_fitted):
+                       reconstructions, snp_data, suppop_labels, pop_labels, kl_weight, 
+                       hc_weight, recon_weight, sim_func, qzx_fitted):
     '''
     Loss function used for the variational autoencoder. Comprises KL divergence, reconstruction, and Hyperbolic HC losses. 
     Arguments:
@@ -50,7 +51,11 @@ def compute_total_loss(model, device, embeddings,
         `qzx_fitted: fitted posterior distribution (pytorch-like)
     '''
     #Calculate hierarchical clustering loss
-    triple_ids, similarities = trips_and_sims(snp_data, sim_func)
+    if sim_func == sim_func_dict["ancestry_label"]:
+        labels_stacked = torch.stack([suppop_labels, pop_labels], dim=1)
+        triple_ids, similarities = trips_and_sims(labels_stacked, sim_func)
+    else:
+        triple_ids, similarities = trips_and_sims(snp_data, sim_func)
     triple_ids = triple_ids.to(device)
     similarities = similarities.float().to(device)
     hyphc_loss = model.calculate_hyphc_loss(embeddings, triple_ids, similarities)
@@ -87,7 +92,8 @@ def run_epoch(model, dloader, device, sim_func, kl_weight, hc_weight, recon_weig
         loc, scale, embeddings_pred, qzx_fitted, reconstructions = model(snp_data)
         #Calculate various terms in the loss
         total, kl, hyphc, recon = compute_total_loss(model, device, embeddings_pred, reconstructions, 
-                                                     snp_data, kl_weight, hc_weight, recon_weight, sim_func, qzx_fitted)
+                                                     snp_data, suppop_labels, pop_labels, kl_weight, 
+                                                     hc_weight, recon_weight, sim_func, qzx_fitted)
         total_losses.append(total.item())
         kl_losses.append(kl.item())
         hyphc_losses.append(hyphc.item())
