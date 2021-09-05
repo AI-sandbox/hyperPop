@@ -1,9 +1,9 @@
 {
-    "output_dir":"/scratch/users/patelas/hyperLAI/models/vae_models/subpop_models/east_asians/500000_threelayers_lowtemp_labelsim_highhc_shuffle_specialized_data/",
-    "data_dir":"/scratch/users/patelas/hyperLAI/snp_data/whole_genome/variance_filtered_500000_subpops/east_asian/",
+    "output_dir":"/scratch/users/patelas/hyperLAI/models/vae_models/scratch/debugging/new_sim_calc_test/",
+    "data_dir":"/scratch/users/patelas/hyperLAI/snp_data/whole_genome/variance_filtered_500000_updated/",
     "index_loc":"/scratch/users/patelas/hyperLAI/ancestry_training_splits/80_10_10/",
     "dataset": "ancestry",
-    "restrict_labels":[1],
+    "restrict_labels":[0,1,2,3,4,5,6],
     "chromosome":"all",
     "train_perc":0.8,
     "valid_perc":0.1,
@@ -22,18 +22,19 @@
     "prior_dist":"WrappedNormal",
     "prior_mean":0.0,
     "prior_std":1.0,
-    "temperature":1e-5,
+    "temperature":1e-6,
     "init_size":1e-3,
     "min_scale":1e-2,
     "max_scale":0.999,
-    "num_epochs":30,
+    "num_epochs":15,
     "learning_rate":1e-2,
     "kl_weight":1,
-    "hc_weight":1000,
+    "hc_weight":1,
     "recon_weight":1,
-    "sim_func":"ancestry_label_subpop",
+    "sim_func":"ancestry_label",
     "early_stopping":true,
     "patience":7,
-    "early_stopping_min_delta":0.0
+    "early_stopping_min_delta":0.0,
+    "shuffle":false
   
 }

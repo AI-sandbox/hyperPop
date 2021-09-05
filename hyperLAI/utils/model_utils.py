@@ -15,7 +15,6 @@ def make_pairwise_similarities(snp_data, sim_func):
     for ind in range(snp_data.shape[0]):
         for ind2 in range(snp_data.shape[0]):
             sim_matrix[ind][ind2] = sim_func(snp_data[ind], snp_data[ind2])
-    sim_matrix /= torch.max(sim_matrix) #Might consider removing this line 
     return sim_matrix
 
 def generate_triple_ids(num_inds):
