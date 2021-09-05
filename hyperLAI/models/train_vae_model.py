@@ -51,7 +51,7 @@ def compute_total_loss(model, device, embeddings,
         `qzx_fitted: fitted posterior distribution (pytorch-like)
     '''
     #Calculate hierarchical clustering loss
-    if sim_func == sim_func_dict["ancestry_label"]:
+    if sim_func in [sim_func_dict["ancestry_label"], sim_func_dict["ancestry_label_subpop"]]:
         labels_stacked = torch.stack([suppop_labels, pop_labels], dim=1)
         triple_ids, similarities = trips_and_sims(labels_stacked, sim_func)
     else:
@@ -185,8 +185,15 @@ def main():
         print(len(dataset_valid), dataset_valid.pop_labels[2])
         
     #Create train and valid dataloaders
-    train_loader = DataLoader(dataset_train, batch_size=args["batch_size"])
-    valid_loader = DataLoader(dataset_valid, batch_size=args["batch_size"])
+    if args["shuffle"]:
+        print("Shuffling per epoch")
+        train_loader = DataLoader(dataset_train, batch_size=args["batch_size"], shuffle=True)
+        valid_loader = DataLoader(dataset_valid, batch_size=args["batch_size"], shuffle=True)
+    else:
+        print("Not shuffling per epoch")
+        train_loader = DataLoader(dataset_train, batch_size=args["batch_size"], shuffle=False)
+        valid_loader = DataLoader(dataset_valid, batch_size=args["batch_size"], shuffle=False)
+      
     
     #Define manifolds and models
     manifold = manifold_dict[args["manifold"]](args["embedding_size"])
