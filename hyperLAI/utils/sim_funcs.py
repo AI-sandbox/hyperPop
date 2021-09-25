@@ -20,6 +20,11 @@ def ancestry_label_sim_subpop(labels_1, labels_2):
     pop_label = int(labels_1[1] == labels_2[1])
     return pop_label
 
+def hamming_minmax(snps_1, snps_2):
+    simil = torch.true_divide(torch.sum(snps_1==snps_2), len(snps_1))
+    simil = (simil - 0.451) / 0.549
+    return max(simil, 0)
+
 
 #hammming: fraction of SNPs that are shared
 sim_func_dict = {
@@ -28,4 +33,5 @@ sim_func_dict = {
     "mnist_even_odd": mnist_label_evenodd,
     "ancestry_label": ancestry_label_sim,
     "ancestry_label_subpop": ancestry_label_sim_subpop,
+    "hamming_minmax": hamming_minmax
 }

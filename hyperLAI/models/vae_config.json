@@ -1,5 +1,5 @@
 {
-    "output_dir":"/scratch/users/patelas/hyperLAI/models/vae_models/scratch/debugging/new_sim_calc_test/",
+    "output_dir":"/scratch/users/patelas/hyperLAI/models/vae_models/full_pop_models/500000_threelayers_tempnegsix_labelsim_highhc_shuffle_withpca/",
     "data_dir":"/scratch/users/patelas/hyperLAI/snp_data/whole_genome/variance_filtered_500000_updated/",
     "index_loc":"/scratch/users/patelas/hyperLAI/ancestry_training_splits/80_10_10/",
     "dataset": "ancestry",
@@ -11,7 +11,7 @@
     "manifold": "PoincareBall",
     "embedding_size":2,
     "enc_type":"fc_wrapped_encoder",
-    "dec_type":"fc_wrapped_decoder",
+    "dec_type":"fc_wrapped_decoder_rawvals",
     "num_encoder_int_layers":3,
     "encoder_int_layer_sizes":[300,200,100],
     "encoder_dropout_vals":[0.2,0.2,0.2],
@@ -26,15 +26,15 @@
     "init_size":1e-3,
     "min_scale":1e-2,
     "max_scale":0.999,
-    "num_epochs":15,
+    "num_epochs":100,
     "learning_rate":1e-2,
     "kl_weight":1,
-    "hc_weight":1,
+    "hc_weight":1000,
     "recon_weight":1,
     "sim_func":"ancestry_label",
     "early_stopping":true,
     "patience":7,
     "early_stopping_min_delta":0.0,
-    "shuffle":false
+    "shuffle":true
   
 }
