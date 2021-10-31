@@ -35,8 +35,11 @@ class fc_model(nn.Module):
                     nn.Dropout(dropout_vals[layer])
                 )
             )
-                
-        self.final_layer = nn.Linear(in_features=int_layer_sizes[-1], out_features=embedding_size)
+               
+        if num_int_layers > 0:
+            self.final_layer = nn.Linear(in_features=int_layer_sizes[-1], out_features=embedding_size)
+        else:
+            self.final_layer = nn.Linear(in_features=self.input_size, out_features=embedding_size)
         self.HypLoss = HyperbolicHCLoss(temperature, init_size, min_scale, max_scale)
         
     def forward(self, snp_data):

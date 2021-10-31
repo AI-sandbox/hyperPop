@@ -20,7 +20,11 @@ def run_epoch(model, dloader, device, sim_func, optimizer=None):
             optimizer.zero_grad()
         else:
             assert optimizer is None
-        triple_ids, similarities = trips_and_sims(snp_data, sim_func)
+        if sim_func in [sim_func_dict["ancestry_label"], sim_func_dict["ancestry_label_subpop"]]:
+            labels_stacked = torch.stack([suppop_labels, pop_labels], dim=1)
+            triple_ids, similarities = trips_and_sims(labels_stacked, sim_func)
+        else:
+            triple_ids, similarities = trips_and_sims(snp_data, sim_func)
         snp_data = snp_data.float().to(device)
         triple_ids = triple_ids.to(device)
         similarities = similarities.float().to(device)
