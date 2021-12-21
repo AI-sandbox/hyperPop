@@ -46,7 +46,8 @@ def train_model(model, train_loader, valid_loader, num_epochs, learning_rate, si
     if optimizer is None:
         optimizer = RAdam(model.parameters(), lr=learning_rate)
     if early_stopping:
-        valid_loss_history = []
+        # valid_loss_history = []
+        counter = 0 #new ES
     best_valid_epoch_loss, best_model = float("inf"), None
     for epoch in range(num_epochs):
         if torch.cuda.is_available:
@@ -63,20 +64,28 @@ def train_model(model, train_loader, valid_loader, num_epochs, learning_rate, si
         if valid_epoch_loss < best_valid_epoch_loss:
             best_valid_epoch_loss = valid_epoch_loss
             best_model = model
-            save_model(model, optimizer, valid_epoch_loss, epoch + 1, output_dir+"model.pt")        
-        if early_stopping:
-            if len(valid_loss_history) < patience + 1:
-                # Not enough history yet; tack on the loss
-                valid_loss_history = [valid_epoch_loss] + valid_loss_history
-            else:
-                # Tack on the new validation loss, kicking off the old one
-                valid_loss_history = \
-                    [valid_epoch_loss] + valid_loss_history[:-1]
-            if len(valid_loss_history) == patience + 1:
-                # There is sufficient history to check for improvement
-                best_delta = np.max(np.diff(valid_loss_history))
-                if best_delta < early_stop_min_delta:
-                    break  # Not improving enough
+            save_model(model, optimizer, valid_epoch_loss, epoch + 1, output_dir+"model.pt")
+            if early_stopping: #new ES
+                counter = 0 #new ES
+        else: #New ES
+            if early_stopping: #new ES
+                counter  += 1 #new ES
+                if counter == patience: #new ES
+                    print("Stopped early") #new ES
+                    break #new ES
+        # if early_stopping:
+        #     if len(valid_loss_history) < patience + 1:
+        #         # Not enough history yet; tack on the loss
+        #         valid_loss_history = [valid_epoch_loss] + valid_loss_history
+        #     else:
+        #         # Tack on the new validation loss, kicking off the old one
+        #         valid_loss_history = \
+        #             [valid_epoch_loss] + valid_loss_history[:-1]
+        #     if len(valid_loss_history) == patience + 1:
+        #         # There is sufficient history to check for improvement
+        #         best_delta = np.max(np.diff(valid_loss_history))
+        #         if best_delta < early_stop_min_delta:
+        #             break  # Not improving enough
         txt_writer.flush()
 
 
@@ -97,8 +106,14 @@ def main():
     print(len(dataset_valid), dataset_valid.pop_labels[2])
         
     #Create train and valid dataloaders
-    train_loader = DataLoader(dataset_train, batch_size=config["batch_size"])
-    valid_loader = DataLoader(dataset_valid, batch_size=config["batch_size"])
+    if config["shuffle"]:
+        print("Shuffling per epoch")
+        train_loader = DataLoader(dataset_train, batch_size=config["batch_size"], shuffle=True)
+        valid_loader = DataLoader(dataset_valid, batch_size=config["batch_size"], shuffle=True)
+    else:
+        print("Not shuffling per epoch")
+        train_loader = DataLoader(dataset_train, batch_size=config["batch_size"], shuffle=False)
+        valid_loader = DataLoader(dataset_valid, batch_size=config["batch_size"], shuffle=False)
 
     model = fc_model(dataset_train.snps.shape[1], config["num_int_layers"], config["int_layer_sizes"], config["embedding_size"], 
                      config["dropout_vals"], config["temperature"], config["init_size"], config["min_scale"], config["max_scale"])

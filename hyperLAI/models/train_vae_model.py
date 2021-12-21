@@ -131,7 +131,8 @@ def train_model(model, train_loader, valid_loader, num_epochs, learning_rate, si
     if optimizer is None:
         optimizer = RAdam(model.parameters(), lr=learning_rate)
     if early_stopping:
-        valid_loss_history = []
+        # valid_loss_history = []
+        counter = 0 #new ES
     best_valid_epoch_loss, best_model = float("inf"), None
     for epoch in range(num_epochs):
         if device == torch.device("cuda"):
@@ -150,20 +151,29 @@ def train_model(model, train_loader, valid_loader, num_epochs, learning_rate, si
         if valid_epoch_loss < best_valid_epoch_loss:
             best_valid_epoch_loss = valid_epoch_loss
             best_model = model
-            save_model(model, optimizer, valid_epoch_loss, epoch + 1, output_dir+"model.pt")        
-        if early_stopping:
-            if len(valid_loss_history) < patience + 1:
-                # Not enough history yet; tack on the loss
-                valid_loss_history = [valid_epoch_loss] + valid_loss_history
-            else:
-                # Tack on the new validation loss, kicking off the old one
-                valid_loss_history = \
-                    [valid_epoch_loss] + valid_loss_history[:-1]
-            if len(valid_loss_history) == patience + 1:
-                # There is sufficient history to check for improvement
-                best_delta = np.max(np.diff(valid_loss_history))
-                if best_delta < early_stop_min_delta:
-                    break  # Not improving enough
+            save_model(model, optimizer, valid_epoch_loss, epoch + 1, output_dir+"model.pt")
+            if early_stopping: #new ES
+                counter = 0 #new ES
+        else: #New ES
+            if early_stopping: #new ES
+                counter  += 1 #new ES
+                if counter == patience: #new ES
+                    print("Stopped early") #new ES
+                    break #new ES
+        # if early_stopping:
+        #     if len(valid_loss_history) < patience + 1:
+        #         # Not enough history yet; tack on the loss
+        #         valid_loss_history = [valid_epoch_loss] + valid_loss_history
+        #     else:
+        #         # Tack on the new validation loss, kicking off the old one
+        #         valid_loss_history = \
+        #             [valid_epoch_loss] + valid_loss_history[:-1]
+        #     if len(valid_loss_history) == patience + 1:
+        #         # There is sufficient history to check for improvement
+        #         best_delta = np.max(np.diff(valid_loss_history))
+        #         if best_delta < early_stop_min_delta:
+        #             break  # Not improving enough
+            
         txt_writer.flush()
 
 def main():
