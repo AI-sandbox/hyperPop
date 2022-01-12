@@ -1,57 +1,12 @@
-hyperLAI
+**Hyperbolic Geometry-Based Deep Learning
+Methods to Produce Population Trees from
+Genotype Data**
 ==============================
 
-Hyperbolic embeddings for Local Ancestry Inference
 
-Project Organization
-------------
+This repo allows for training and evaluation of a variety of models to produce continuous tree representations from genotype data. 
+- HypHC Model ([Chami et al. 2020](https://arxiv.org/pdf/2010.00402.pdf)) - use `notebooks/train_simple_model.ipynb` with the appropriate parameter specifications
+- MLP (fully connected model) - first, navigate to `hyperLAI/models`. Then, configure the parameters and other specifications in fc_config.json` Finally, run `python train_fc_model.py`
+- VAE (variational autoencoder) - first, navigate to `hyperLAI/models`. Then, configure the parameters and other specifications in vae_config.json` Finally, run `python train_vae_model.py`
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
-
-
---------
-
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+To evaluate the MLP model and visualize its output, use `notebooks/eval_fc_model.ipynb`, and to do the same for the VAE model, use `notebooks/eval_vae_model.ipynb`
