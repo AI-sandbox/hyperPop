@@ -1,5 +1,5 @@
 {
-    "output_dir":"/scratch/users/patelas/hyperLAI/models/vae_models/full_pop_models/20211010_500000_threelayers_lowtemp_hammnigminmax_hctenfour/",
+    "output_dir":"/scratch/users/patelas/hyperLAI/models/vae_models/full_pop_models/500000_threelayers_tempnegsix_shuffle_newearlystop_patience7/",
     "data_dir":"/scratch/users/patelas/hyperLAI/snp_data/whole_genome/variance_filtered_500000_updated/",
     "index_loc":"/scratch/users/patelas/hyperLAI/ancestry_training_splits/80_10_10/",
     "dataset": "ancestry",
@@ -22,19 +22,19 @@
     "prior_dist":"WrappedNormal",
     "prior_mean":0.0,
     "prior_std":1.0,
-    "temperature":1e-5,
+    "temperature":1e-6,
     "init_size":1e-3,
     "min_scale":1e-2,
     "max_scale":0.999,
     "num_epochs":50,
     "learning_rate":1e-2,
     "kl_weight":1,
-    "hc_weight":10000,
+    "hc_weight":1,
     "recon_weight":1,
-    "sim_func":"hamming_minmax",
+    "sim_func":"hamming",
     "early_stopping":true,
     "patience":7,
     "early_stopping_min_delta":0.0,
-    "shuffle":false
+    "shuffle":true
   
 }

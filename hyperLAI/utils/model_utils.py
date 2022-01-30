@@ -3,6 +3,13 @@ import numpy as np
 import pandas as pd
 import itertools
 import json
+import sys
+import networkx as nx
+sys.path.append("../")
+from HypHC.utils.poincare import project
+from HypHC.utils.linkage import nn_merge_uf_fast_np, sl_from_embeddings
+from HypHC.utils.metrics import dasgupta_cost
+
 
 def make_pairwise_similarities(snp_data, sim_func):
     '''
@@ -115,5 +122,22 @@ def fst_filter(snp_data, indices, labels, snps_to_keep):
     print(fst_vals[snps_preserved[0]], fst_vals[snps_preserved[1]])
     return snps_preserved
       
+def decode_tree_fc(model, embeddings, device, fast_decoding):
+    """Build a binary tree (nx graph) from leaves' embeddings for the fc model. Assume points are normalized to same radius.
+        Taken from HypHC repo (https://github.com/HazyResearch/HypHC)
+    
+    """
+    with torch.no_grad():
+        leaves_embeddings = model.HypLoss.normalize_embeddings(embeddings.to(device))
+        leaves_embeddings = project(leaves_embeddings).cpu()
+    sim_fn = lambda x, y: torch.sum(x * y, dim=-1)
+    if fast_decoding:
+        parents = nn_merge_uf_fast_np(leaves_embeddings, S=sim_fn, partition_ratio=1.2)
+    else:
+        parents = sl_from_embeddings(leaves_embeddings, sim_fn)
+    tree = nx.DiGraph()
+    for i, j in enumerate(parents[:-1]):
+        tree.add_edge(j, i)
+    return tree
 
                         

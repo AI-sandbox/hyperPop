@@ -1,12 +1,12 @@
 {
-    "output_dir":"/scratch/users/patelas/hyperLAI/models/fc_models/full_pop_models/20211017_lr_negthree_temp_negfour_batchsize128_minmax/",
+    "output_dir":"/scratch/users/patelas/hyperLAI/models/fc_models/full_pop_models/20211114_lr_negthree_temp_negfour_shuffled_earlystop_patience7/",
     "data_dir":"/scratch/users/patelas/hyperLAI/snp_data/whole_genome/variance_filtered_500000_updated/",
     "index_loc":"/scratch/users/patelas/hyperLAI/ancestry_training_splits/80_10_10/",
     "restrict_labels":[0,1,2,3,4,5,6],
     "chromosome":"all",
     "train_perc":0.8,
     "valid_perc":0.1,
-    "batch_size":128,
+    "batch_size":64,
     "num_int_layers":3,
     "int_layer_sizes":[300,200,100],
     "embedding_size":2,
@@ -15,12 +15,13 @@
     "init_size":1e-3,
     "min_scale":1e-2,
     "max_scale":0.999,
-    "num_epochs":30,
+    "num_epochs":100,
     "learning_rate":1e-3,
     "variance_filter":null,
-    "sim_func":"hamming_minmax",
+    "sim_func":"hamming",
     "early_stopping":true,
     "patience":7,
-    "early_stopping_min_delta":0.0
+    "early_stopping_min_delta":0.0,
+    "shuffle":true
   
 }
