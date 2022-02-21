@@ -4,7 +4,7 @@ Genotype Data**
 ==============================
 
 
-This repo allows for training and evaluation of a variety of models to produce continuous tree representations from genotype data. 
+This repo allows for evaluation and training of a variety of models to produce continuous tree representations from genotype data. 
 
 Required packages can be installed by running `pip install -r requirements.txt`
 
@@ -38,16 +38,7 @@ Next, you will need to define train, validation, and test splits for the data. T
 
 Finally, the appropriate config file will need to be filled out. For the VAE model, this is `hyperLAI/models/vae_config.json`, and for the MLP model, this is `hyperLAI/models/fc_config.json`. Examples and explanations of the various parameters can be found [here](https://drive.google.com/file/d/1mh9AwTuG2m7Raqa_M0cO8BOhsE3KooLN/view?usp=sharing) and [here](https://drive.google.com/file/d/171xQdnj45nnNkGyc0gL49-Y-i19v1FFY/view?usp=sharing).  
 
-
-- HypHC Model ([Chami et al. 2020](https://arxiv.org/pdf/2010.00402.pdf)) - use `notebooks/train_simple_model.ipynb` with the appropriate parameter specifications
-- MLP (fully connected model) - first, navigate to `hyperLAI/models`. Then, configure the parameters and other specifications in fc_config.json` Finally, run `python train_fc_model.py`
-- VAE (variational autoencoder) - first, navigate to `hyperLAI/models`. Then, configure the parameters and other specifications in vae_config.json` Finally, run `python train_vae_model.py`
-
 After this, simply run `python train_vae_model.py` or `python train_fc_model.py` from the same folder. 
 
 One important modeling choice concerns the similarity function used. Currently, we use a simple function which calculates the fraction of SNPs shared between two individuals. However, this can be customized - the training script supports any similarity function on the SNP data, and it can be adapted to support similarity functions on the labels as well. See `hyperLAI/utils/sim_funcs.py` for more information. 
 
-
-
-
-To evaluate the MLP model and visualize its output, use `notebooks/eval_fc_model.ipynb`, and to do the same for the VAE model, use `notebooks/eval_vae_model.ipynb`
