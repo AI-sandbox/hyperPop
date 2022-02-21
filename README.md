@@ -28,9 +28,15 @@ This repo also has functionality to train both the VAE and MLP models. Although 
 
 The first step is to create a folder that contains the following files. For the file size descriptions below, assume `num_individuals` is the number of diploid individuals in the dataset, and `num_genotypes`, or `2 * num_individuals`, is the number of haploid genotypes. 
 - `all_snps.npy`: numpy array file containing the SNP data to train and test on. It should be an array of shape `num_genotypes x num_snps`, where each value is a 1 or 0 (as found in a VCF file)
-- `labels_pop.npy`: numpy array containing population labels for each individual. It should be an array of length `num_individuals`. In our data, these labels correspond to the specific ethnicities of each individual. 
-- `labels_suppop.npy`: numpy array containing superpopulation labels for each individual. It should be an array of length `num_individuals`. In our data, these labels correspond to the continent each individual is from. 
-- 
+- `labels_pop.npy`: numpy array containing integer population labels for each individual. It should be an array of length `num_individuals`. In our data, these labels correspond to the specific ethnicities of each individual. 
+- `labels_suppop.npy`: numpy array containing integer superpopulation labels for each individual. It should be an array of length `num_individuals`. In our data, these labels correspond to the continent each individual is from. 
+- `pop_index.npy`: numpy array containing string population labels which correspond to the integer labels found in `labels_pop.npy`. It should be an array of length   `num_individuals`.
+- `suppop_code_index.npy`: numpy array containing string superpopulation labels which correspond to the integer labels found in `labels_suppop.npy`. It should be an array of length `num_individuals`.
+- `coords.npy` and `suppop_index.npy` are legacy requirements and not used. You can just use dummy numpy arrays for these. 
+
+Next, you will need to define train, validation, and test splits for the data. To do this, create a folder and populate it with `train_indices.npy`, `valid_indices.npy`, and `test_indices.npy`. All indices from 0 to `num_genotypes` should be included in one of these three files. 
+
+Finally, the appropriate config file will need to be filled out. For the VAE model, this is `hyperLAI/models/vae_config.json`, and for the MLP model, this is `hyperLAI/models/fc_config.json`. 
 
 
 - HypHC Model ([Chami et al. 2020](https://arxiv.org/pdf/2010.00402.pdf)) - use `notebooks/train_simple_model.ipynb` with the appropriate parameter specifications
