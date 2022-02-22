@@ -14,7 +14,7 @@ In our paper, we report results on fully connected (MLP) and variational autoenc
 First, download the [pretrained models](https://drive.google.com/file/d/1se3PHBgG44M_kpzG3WXiPOAzHWtIUsiA/view?usp=sharing) into a directory of your choice, and expand the file. 
 
 The script to run these models is found in `bin/run_hyp_model.py`. The options for this script are as follows:
-- `--input_vcf`: The input VCF file consisting of SNP data for the relevant samples. These should contain the 500,000 SNPs in order as detailed in THIS FILE (hg19 coordinates).  
+- `--input_vcf`: The input VCF file consisting of SNP data for the relevant samples. These should contain the 500,000 SNPs in order as detailed in `snps_for_trained_model.tsv` (hg19 coordinates).  
 - `--labels`: Text file containing the labels assigned to each data point. Should have one value per line. Labels can be numerical or categorical. 
 - `--model_dir`: Directory the trained models are stored in. 
 - `--model_type`: Which model to use. Choices are `HypVAE` (hyperbolic VAE model) or `HypMLP` (hyperbolic MLP model).
