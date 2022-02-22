@@ -27,6 +27,9 @@ from models.fc_model import fc_model
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 class SimpleSNPDataset(data.Dataset):
+    '''
+    Simple PyTorch dataset class to use in this script
+    '''
     def __init__(self, snp_data):
         self.snp_data = snp_data
     def __len__(self):
@@ -38,11 +41,15 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_vcf", type=str)
     parser.add_argument("--labels", type=str)
+    parser.add_argument("--model_dir", type=str)
     parser.add_argument("--model_type", type=str, choices=["HypVAE", "HypMLP"])
     parser.add_argument("--output_dir", type=str)
     return parser.parse_args()
 
 def load_data(input_vcf, label_file):
+    '''
+    Loads the SNP data and labels into formats that can be used in the later functions
+    '''
     #Load vcf file from skallel 
     vcf_snp_data = allel.read_vcf(input_vcf, samples=[0,1,2,3,4,5])['calldata/GT'] #Remove samples after testing
     snp_matrix = vcf_snp_data.reshape(vcf_snp_data.shape[0], 
@@ -71,25 +78,29 @@ def make_pairwise_similarities(data, sim_func):
     sim_matrix /= np.amax(sim_matrix)
     return sim_matrix
 
-def load_model(model_type):
+def load_model(model_dir, model_type):
+    '''
+    Loads specified model from model_dir
+    '''
     if model_type == "HypVAE":
         manifold = PoincareBall(2)
         enc_type, dec_type  = fc_wrapped_encoder, fc_wrapped_decoder
         encoder = enc_type(manifold, 500000, 3, [300,200,100], [0.2,0.2,0.2], 2)
         decoder = dec_type(manifold, 500000, 3, [100,200,300], [0.2,0.2,0.2], 2)
         model = vae_model(encoder, decoder, manifold, WrappedNormal, WrappedNormal, 0.0, 1.0, 1e-6, 1e-3, 1e-2, 0.999)
-        # model_info = torch.load("../pretrained_models/vae_model.pt")
-        model_info = torch.load("/scratch/users/patelas/junk/model.pt")
+        model_info = torch.load("%s/vae_model.pt"%(model_dir))
         model.load_state_dict(model_info["model_state"])
-        # model = torch.load("../pretrained_models/vae_model.pt")
     else:
         model = fc_model(500000, 3, [300,200,100], 2, [0.2, 0.2, 0.2], 0.0001, 1e-3, 1e-2, 0.999)
-        model_info = torch.load("/scratch/users/patelas/junk/model.pt")
+        model_info = torch.load("%s/fc_model.pt"%(model_dir))
         model.load_state_dict(model_info["model_state"])
     return model
 
 
 def predict(loader, model, model_type, output_dir):
+    '''
+    Makes predictions using model and saves to file
+    '''
     snps, embeddings = [], []
     with torch.no_grad():
         for i, snp_data in enumerate(loader):
@@ -105,6 +116,9 @@ def predict(loader, model, model_type, output_dir):
     return snps, embeddings
 
 def plot_weights(embeddings, labels, output_dir):
+    '''
+    Plots the predicted embeddings
+    '''
     sns.set_style('white')
     scplot = sns.scatterplot(x=embeddings[:,0], y=embeddings[:,1], hue=labels)
     plt.xlabel("Embedding 1", fontsize=16)
@@ -139,7 +153,7 @@ def make_tree(model, embeddings, output_dir, model_type):
 def main():
     args = parse_args()
     snp_loader, labels = load_data(args.input_vcf, args.labels)
-    model = load_model(args.model_type).to(device)
+    model = load_model(args.model_dir, args.model_type).to(device)
     snps, embeddings = predict(snp_loader, model, args.model_type, args.output_dir)
     emb_plot = plot_weights(embeddings, labels, args.output_dir)
     tree = make_tree(model, embeddings, args.output_dir, args.model_type)
