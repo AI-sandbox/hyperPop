@@ -39,11 +39,11 @@ class SimpleSNPDataset(data.Dataset):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input_vcf", type=str)
-    parser.add_argument("--labels", type=str)
-    parser.add_argument("--model_dir", type=str)
-    parser.add_argument("--model_type", type=str, choices=["HypVAE", "HypMLP"])
-    parser.add_argument("--output_dir", type=str)
+    parser.add_argument("--input_vcf", type=str, required=True)
+    parser.add_argument("--labels", type=str, required=True)
+    parser.add_argument("--model_dir", type=str, required=True)
+    parser.add_argument("--model_type", type=str, choices=["HypVAE", "HypMLP"], required=True)
+    parser.add_argument("--output_dir", type=str, required=True)
     return parser.parse_args()
 
 def load_data(input_vcf, label_file):
