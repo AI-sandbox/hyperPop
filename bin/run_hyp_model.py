@@ -51,7 +51,7 @@ def load_data(input_vcf, label_file):
     Loads the SNP data and labels into formats that can be used in the later functions
     '''
     #Load vcf file from skallel 
-    vcf_snp_data = allel.read_vcf(input_vcf, samples=[0,1,2,3,4,5])['calldata/GT'] #Remove samples after testing
+    vcf_snp_data = allel.read_vcf(input_vcf)['calldata/GT']
     snp_matrix = vcf_snp_data.reshape(vcf_snp_data.shape[0], 
                                         vcf_snp_data.shape[1] * vcf_snp_data.shape[2]).T
     snp_torch_dataset = SimpleSNPDataset(snp_matrix)
